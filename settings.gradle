@@ -1,0 +1,4 @@
+rootProject.name = 'ShoppingService'
+include 'CustomerServiceApplication'
+include 'OrderServiceApplication'
+
