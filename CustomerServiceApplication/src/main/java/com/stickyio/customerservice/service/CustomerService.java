@@ -1,10 +1,13 @@
+/* * Copyright 2023-2024 the original author or authors. * * TBD */
+
 package com.stickyio.customerservice.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.stickyio.customerservice.dao.Customer;
 import com.stickyio.customerservice.repository.CustomerRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j

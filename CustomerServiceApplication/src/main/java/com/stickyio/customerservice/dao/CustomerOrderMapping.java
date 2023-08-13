@@ -1,6 +1,9 @@
+/* * Copyright 2023-2024 the original author or authors. * * TBD */
+
 package com.stickyio.customerservice.dao;
 
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

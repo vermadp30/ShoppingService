@@ -1,3 +1,5 @@
+/* * Copyright 2023-2024 the original author or authors. * * TBD */
+
 package com.stickyio.shoppingservice;
 
 import org.springframework.boot.SpringApplication;

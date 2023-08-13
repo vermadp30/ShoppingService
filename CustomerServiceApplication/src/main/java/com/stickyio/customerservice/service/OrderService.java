@@ -1,10 +1,7 @@
+/* * Copyright 2023-2024 the original author or authors. * * TBD */
+
 package com.stickyio.customerservice.service;
 
-import com.stickyio.customerservice.dao.CustomerOrderMapping;
-import com.stickyio.customerservice.repository.CustomerOrderRepository;
-import com.stickyio.orderservice.dto.OrderReplyDto;
-import com.stickyio.orderservice.dto.OrderRequestDto;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -12,6 +9,12 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+
+import com.stickyio.customerservice.dao.CustomerOrderMapping;
+import com.stickyio.customerservice.repository.CustomerOrderRepository;
+import com.stickyio.orderservice.dto.OrderReplyDto;
+import com.stickyio.orderservice.dto.OrderRequestDto;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
