@@ -12,9 +12,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OrderReplyDto {
 
-    Long customerId;
-    Long orderId;
-    OrderStatus status;
+    private Long customerId;
+    private Long orderId;
+    private OrderStatus status;
 
     public OrderReplyDto(Long customerId, Long orderId, OrderStatus status) {
         this.customerId = customerId;

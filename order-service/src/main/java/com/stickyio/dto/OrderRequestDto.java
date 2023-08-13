@@ -10,8 +10,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class OrderRequestDto {
-    Long customerId;
-    String item;
+    private Long customerId;
+    private String item;
 
     public OrderRequestDto(Long customerId, String item) {
         this.customerId = customerId;
