@@ -2,6 +2,7 @@
 
 package com.stickyio.service;
 
+import com.stickyio.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -16,6 +17,8 @@ import com.stickyio.dto.OrderReplyDto;
 import com.stickyio.dto.OrderRequestDto;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class OrderService {
@@ -23,10 +26,14 @@ public class OrderService {
     CustomerOrderRepository customerOrderRepository;
 
     @Autowired
+    CustomerRepository customerRepository;
+
+    @Autowired
     KafkaTemplate<String, OrderRequestDto> kafkaTemplate;
 
-    public void createOrder(OrderRequestDto order){
+    public String createOrder(OrderRequestDto order){
         createOrderRequest(order);
+        return "Creating Order";
     }
     public void createOrderRequest(OrderRequestDto order){
         log.info(String.format("Create Order Request: %s",order.toString()));
@@ -40,11 +47,16 @@ public class OrderService {
     }
 
     @KafkaListener(topics = "create-order-reply", groupId = "shoppingGroup")
-    void getOrderReply(OrderReplyDto orderReply)
-    {
+    void getOrderReply(OrderReplyDto orderReply){
         log.info(String.format("Order created with order-id: %s",orderReply.getOrderId()));
         customerOrderRepository.save(new CustomerOrderMapping(
                 orderReply.getCustomerId(), orderReply.getOrderId())
         );
+    }
+
+    public List<CustomerOrderMapping> getOrderByEmail(String email){
+        return customerOrderRepository.findByCustomerId(
+                customerRepository.getByEmail(email)
+                        .getId());
     }
 }

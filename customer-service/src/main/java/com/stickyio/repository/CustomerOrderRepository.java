@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,4 +19,5 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrderMapp
     @Query("UPDATE CustomerOrderMapping co SET co.currentStatus = :newStatus WHERE co.orderId = :orderId")
     int updateCourierStatusByOrderId(@Param("orderId") Long orderId,
                                       @Param("newStatus") String newStatus);
+    List<CustomerOrderMapping> findByCustomerId(Long customerId);
 }

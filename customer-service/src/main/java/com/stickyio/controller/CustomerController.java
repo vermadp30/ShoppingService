@@ -23,8 +23,8 @@ public class CustomerController {
         return ResponseEntity.ok(customer);
     }
 
-    @GetMapping("/{emailId}")
-    Customer getCustomer(@PathVariable String emailId){
-        return  customerService.getCustomer(emailId);
+    @GetMapping
+    Customer getCustomer(@RequestParam String email){
+        return  customerService.getCustomer(email);
     }
 }

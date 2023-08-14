@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import com.stickyio.service.OrderService;
 import com.stickyio.dto.OrderRequestDto;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -28,8 +29,13 @@ public class OrderController {
     CustomerOrderRepository customerOrderRepository;
 
     @PostMapping
-    void createOrder(@RequestBody OrderRequestDto order) {
-        orderService.createOrder(order);
+    String createOrder(@RequestBody OrderRequestDto order){
+        return orderService.createOrder(order);
+    }
+
+    @GetMapping
+    List<CustomerOrderMapping> getOrdersForCustomer(@RequestParam String email){
+        return orderService.getOrderByEmail(email);
     }
 
     @GetMapping("/track/{orderId}")
