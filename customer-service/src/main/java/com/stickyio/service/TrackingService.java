@@ -2,9 +2,11 @@
 
 package com.stickyio.service;
 
+import com.stickyio.dao.CustomerOrderMapping;
 import com.stickyio.dto.TrackingRequestDto;
 import com.stickyio.dto.TrackingResponseDto;
 import com.stickyio.repository.CustomerOrderRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -29,18 +31,18 @@ public class TrackingService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public Optional<String> createTrackingRequest(Long orderId) throws InterruptedException {
+    public CustomerOrderMapping createTrackingRequest(Long orderId) {
         log.info(String.format("Tracking for: %s",orderId));
         Message<TrackingRequestDto> message = MessageBuilder
                 .withPayload(new TrackingRequestDto(orderId))
                 .setHeader(KafkaHeaders.TOPIC,"track-order-request")
                 .build();
         kafkaTemplate.send(message);
-        wait(1000);
-        return customerOrderRepository.getCurrentStatusByOrderId(orderId);
+        return customerOrderRepository.findFirstByOrderId(orderId);
     }
 
-    @KafkaListener(topics = "track-order-reply")
+    @Transactional
+    @KafkaListener(topics = "track-order-reply", groupId = "shoppingGroup")
     public void receiveTrackingReply(TrackingResponseDto trackingResponse) {
         log.info(String.format("Received Tracking Response: %s", trackingResponse.toString()));
         customerOrderRepository.updateCourierStatusByOrderId(

@@ -5,6 +5,7 @@ package com.stickyio.service;
 import com.stickyio.dto.TrackingRequestDto;
 import com.stickyio.dto.TrackingResponseDto;
 import com.stickyio.repository.CourierRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -37,7 +38,8 @@ public class ExternalTrackingService {
         kafkaTemplate.send(message);
     }
 
-    @KafkaListener(topics = "track-order-ext-reply")
+    @Transactional
+    @KafkaListener(topics = "track-order-ext-reply", groupId = "shoppingGroup")
     public void receiveExternalTrackingReply(TrackingResponseDto trackingResponse) {
         log.info(String.format("Received Tracking Response: %s", trackingResponse.toString()));
         courierRepository.updateCourierStatusAndIsDeliveredByOrderId(

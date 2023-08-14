@@ -13,9 +13,9 @@ import java.util.Optional;
 
 @Repository
 public interface CustomerOrderRepository extends JpaRepository<CustomerOrderMapping,Long> {
-    Optional<String> getCurrentStatusByOrderId(Long orderId);
+    CustomerOrderMapping findFirstByOrderId(Long orderId);
     @Modifying
-    @Query("UPDATE Courier c SET c.currentStatus = :newStatus WHERE c.orderId = :orderId")
-    void updateCourierStatusByOrderId(@Param("orderId") Long orderId,
+    @Query("UPDATE CustomerOrderMapping co SET co.currentStatus = :newStatus WHERE co.orderId = :orderId")
+    int updateCourierStatusByOrderId(@Param("orderId") Long orderId,
                                       @Param("newStatus") String newStatus);
 }

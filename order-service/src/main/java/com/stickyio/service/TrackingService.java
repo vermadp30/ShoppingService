@@ -22,6 +22,8 @@ import java.util.Optional;
 public class TrackingService {
     @Autowired
     CourierRepository courierRepository;
+    @Autowired
+    ExternalTrackingService externalTrackingService;
     private KafkaTemplate<String, TrackingRequestDto> kafkaTrackingServiceTemplate;
 
     public TrackingService(KafkaTemplate<String, TrackingRequestDto> kafkaTemplate) {
@@ -33,6 +35,7 @@ public class TrackingService {
     public void receiveTrackingRequest(TrackingRequestDto trackingRequest)
     {
         log.info(String.format("Track Order Request Received: %s",trackingRequest.toString()));
+        externalTrackingService.createExternalTrackingRequest(trackingRequest.getOrderId());
         sendTrackingReply(trackingRequest.getOrderId());
     }
 

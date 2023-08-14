@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "customer-order-mapping")
+@Table(name = "customer-order-mappings")
 @NoArgsConstructor
 @Setter
 @Getter
