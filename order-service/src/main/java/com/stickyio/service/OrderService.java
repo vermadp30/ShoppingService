@@ -2,6 +2,8 @@
 
 package com.stickyio.service;
 
+import com.stickyio.dao.Courier;
+import com.stickyio.repository.CourierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -22,7 +24,6 @@ import com.stickyio.repository.OrderRepository;
 @Service
 @Slf4j
 public class OrderService {
-    public static Logger LOGGER= LoggerFactory.getLogger(OrderService.class);
 
     private KafkaTemplate<String, OrderReplyDto> kafkaTemplate;
 
@@ -34,6 +35,9 @@ public class OrderService {
     @Autowired
     OrderRepository orderRepository;
 
+    @Autowired
+    CourierRepository courierRepository;
+
     @KafkaListener(topics = "create-order", groupId = "shoppingGroup")
     void createOrder(OrderRequestDto orderRequest)
     {
@@ -43,7 +47,17 @@ public class OrderService {
         order.setItem(orderRequest.getItem());
         order.setStatus(OrderStatus.ORDER_PLACED);
         order=orderRepository.save(order);
+        addCourierDetails(order);
         createOrderReply(order);
+    }
+
+    public void addCourierDetails(Order order)
+    {
+        courierRepository.save(new Courier(
+                order.getId(),
+                "Order Received",
+                false
+                ));
     }
 
     public void createOrderReply(Order order){

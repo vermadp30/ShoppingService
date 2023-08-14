@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "customer")
+@Table(name = "customers")
 @NoArgsConstructor
 @Setter
 @Getter
@@ -21,7 +21,7 @@ public class Customer {
 
     private String name;
 
-    @Column(name = "email-id", unique = true, nullable = false)
-    private String emailId;
+    @Column(unique = true, nullable = false)
+    private String email;
 }
 

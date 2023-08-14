@@ -2,7 +2,7 @@
 
 package com.stickyio.dto;
 
-import com.stickyio.dao.OrderStatus;
+import com.stickyio.enums.OrderStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

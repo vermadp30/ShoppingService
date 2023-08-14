@@ -21,9 +21,9 @@ public class CustomerService {
         return customer.getId();
     }
 
-    public Customer getCustomer(String emailId){
+    public Customer getCustomer(String email){
 
-        return customerRepository.getByEmailId(emailId);
+        return customerRepository.getByEmail(email);
     }
 
 }

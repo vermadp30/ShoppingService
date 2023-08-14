@@ -17,13 +17,13 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
-    @Column(unique = true, nullable = false)
-    Long customerId;
+    @Column(nullable = false)
+    private Long customerId;
 
-    String Item;
+    private String Item;
 
     @Enumerated(EnumType.STRING)
-    OrderStatus status;
+    private OrderStatus status;
 }

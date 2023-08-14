@@ -3,32 +3,31 @@
 package com.stickyio.dao;
 
 import jakarta.persistence.*;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "customer-order-mappings")
-@NoArgsConstructor
-@Setter
 @Getter
-public class CustomerOrderMapping {
+@Setter
+@NoArgsConstructor
+@Table(name="couriers")
+public class Courier {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "customer-id", nullable = false)
-    private Long customerId;
-
-    @Column(name= "order-id", nullable = false, unique = true)
+    @Column(unique = true, nullable = false)
     private Long orderId;
 
     private String currentStatus;
 
-    public CustomerOrderMapping(Long customerId, Long orderId) {
-        this.customerId = customerId;
+    private Boolean isDelivered;
+
+    public Courier(Long orderId, String currentStatus, Boolean isDelivered) {
         this.orderId = orderId;
+        this.currentStatus = currentStatus;
+        this.isDelivered = isDelivered;
     }
 }

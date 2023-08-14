@@ -14,4 +14,28 @@ public class KafkaOrderTopicConfig {
         return TopicBuilder.name("create-order-reply")
                 .build();
     }
+
+    @Bean
+    public NewTopic TrackOrderExternalRequestTopic(){
+        return TopicBuilder.name("track-order-ext-request")
+                .build();
+    }
+
+    @Bean
+    public NewTopic TrackOrderExternalReplyTopic(){
+        return TopicBuilder.name("track-order-ext-reply")
+                .build();
+    }
+
+    @Bean
+    public NewTopic TrackOrderRequestTopic(){
+        return TopicBuilder.name("track-order-request")
+                .build();
+    }
+
+    @Bean
+    public NewTopic TrackOrderReplyTopic(){
+        return TopicBuilder.name("track-order-reply")
+                .build();
+    }
 }
