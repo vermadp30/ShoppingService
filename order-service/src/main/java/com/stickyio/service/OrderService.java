@@ -9,6 +9,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
@@ -21,26 +22,20 @@ import com.stickyio.dto.OrderReplyDto;
 import com.stickyio.dto.OrderRequestDto;
 import com.stickyio.repository.OrderRepository;
 
+import static com.stickyio.util.CustomerConstants.CREATE_ORDER_TOPIC;
+
 @Service
 @Slf4j
 public class OrderService {
-
-    private KafkaTemplate<String, OrderReplyDto> kafkaTemplate;
-
-    public OrderService(KafkaTemplate<String, OrderReplyDto> kafkaTemplate) {
-
-        this.kafkaTemplate = kafkaTemplate;
-    }
-
     @Autowired
     OrderRepository orderRepository;
 
     @Autowired
     CourierRepository courierRepository;
 
-    @KafkaListener(topics = "create-order", groupId = "shoppingGroup")
-    void createOrder(OrderRequestDto orderRequest)
-    {
+    @KafkaListener(topics = CREATE_ORDER_TOPIC, groupId = "shoppingGroup")
+    @SendTo
+    OrderReplyDto createOrder(OrderRequestDto orderRequest) throws InterruptedException{
         log.info(String.format("Create Order Request Received: %s",orderRequest.toString()));
         Order order=new Order();
         order.setCustomerId(orderRequest.getCustomerId());
@@ -48,7 +43,11 @@ public class OrderService {
         order.setStatus(OrderStatus.ORDER_PLACED);
         order=orderRepository.save(order);
         addCourierDetails(order);
-        createOrderReply(order);
+        OrderReplyDto orderReply=new OrderReplyDto(
+                order.getCustomerId(),
+                order.getId(),
+                order.getStatus());
+        return orderReply;
     }
 
     public void addCourierDetails(Order order)
@@ -58,21 +57,5 @@ public class OrderService {
                 "Order Received",
                 false
                 ));
-    }
-
-    public void createOrderReply(Order order){
-        log.info(String.format("Order created with order id: %s", order.getId()));
-
-        OrderReplyDto orderReply=new OrderReplyDto(
-                order.getCustomerId(),
-                order.getId(),
-                order.getStatus());
-
-        Message<OrderReplyDto> message = MessageBuilder
-                .withPayload(orderReply)
-                .setHeader(KafkaHeaders.TOPIC,"create-order-reply")
-                .build();
-
-        kafkaTemplate.send(message);
     }
 }

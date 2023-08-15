@@ -9,20 +9,16 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 public class ExternalCourierService {
-    private final KafkaTemplate<String, TrackingResponseDto> kafkaReplyTemplate;
-
-    public ExternalCourierService(KafkaTemplate<String, TrackingResponseDto> kafkaReplyTemplate) {
-        this.kafkaReplyTemplate = kafkaReplyTemplate;
-    }
-
     @KafkaListener(topics = "track-order-ext-request", groupId = "shoppingGroup")
-    public void processOrderStatusRequest(TrackingRequestDto trackingRequest) {
+    @SendTo
+    public TrackingResponseDto processOrderStatusRequest(TrackingRequestDto trackingRequest) {
         log.info(String.format("Received Tracking Request for order: %s",trackingRequest.getOrderId()));
         String location = generateRandomStatus(trackingRequest.getOrderId());
         String status="Packet arrived at " + location + " hub";
@@ -34,11 +30,7 @@ public class ExternalCourierService {
         log.info(String.format("Sending Status as %s for Order Id: %s",
                 trackingResponse.getCurrentStatus(),
                 trackingResponse.getOrderId()));
-        Message<TrackingResponseDto> message = MessageBuilder
-                .withPayload(trackingResponse)
-                .setHeader(KafkaHeaders.TOPIC,"track-order-ext-reply")
-                .build();
-        kafkaReplyTemplate.send(message);
+        return trackingResponse;
     }
 
     private String generateRandomStatus(Long orderNumber) {
