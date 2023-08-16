@@ -12,16 +12,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrackingResponseDto {
-    private Long orderId;
-    private String currentStatus;
-    private Boolean isDelivered;
 
-    @Override
-    public String toString() {
-        return "TrackingResponseDto{" +
-                "orderId=" + orderId +
-                ", currentStatus='" + currentStatus + '\'' +
-                ", isDelivered=" + isDelivered +
-                '}';
-    }
+  private Long orderId;
+  private String currentStatus;
+  private Boolean isDelivered;
+
+  @Override
+  public String toString() {
+    return "TrackingResponseDto{" +
+        "orderId=" + orderId +
+        ", currentStatus='" + currentStatus + '\'' +
+        ", isDelivered=" + isDelivered +
+        '}';
+  }
 }

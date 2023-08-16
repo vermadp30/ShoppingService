@@ -12,12 +12,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrackingRequestDto {
-    private Long orderId;
 
-    @Override
-    public String toString() {
-        return "TrackingRequestDto{" +
-                "orderId=" + orderId +
-                '}';
-    }
+  private Long orderId;
+
+  @Override
+  public String toString() {
+    return "TrackingRequestDto{" +
+        "orderId=" + orderId +
+        '}';
+  }
 }

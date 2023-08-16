@@ -10,19 +10,20 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class OrderRequestDto {
-    private Long customerId;
-    private String item;
 
-    public OrderRequestDto(Long customerId, String item) {
-        this.customerId = customerId;
-        this.item = item;
-    }
+  private Long customerId;
+  private String item;
 
-    @Override
-    public String toString() {
-        return "OrderRequestDto{" +
-                "customerId=" + customerId +
-                ", item='" + item + '\'' +
-                '}';
-    }
+  public OrderRequestDto(Long customerId, String item) {
+    this.customerId = customerId;
+    this.item = item;
+  }
+
+  @Override
+  public String toString() {
+    return "OrderRequestDto{" +
+        "customerId=" + customerId +
+        ", item='" + item + '\'' +
+        '}';
+  }
 }

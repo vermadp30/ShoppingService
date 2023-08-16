@@ -12,22 +12,22 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OrderReplyDto {
 
-    private Long customerId;
-    private Long orderId;
-    private OrderStatus status;
+  private Long customerId;
+  private Long orderId;
+  private OrderStatus status;
 
-    public OrderReplyDto(Long customerId, Long orderId, OrderStatus status) {
-        this.customerId = customerId;
-        this.orderId = orderId;
-        this.status = status;
-    }
+  public OrderReplyDto(Long customerId, Long orderId, OrderStatus status) {
+    this.customerId = customerId;
+    this.orderId = orderId;
+    this.status = status;
+  }
 
-    @Override
-    public String toString() {
-        return "OrderReplyDto{" +
-                "customerId=" + customerId +
-                ", orderId=" + orderId +
-                ", status=" + status +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "OrderReplyDto{" +
+        "customerId=" + customerId +
+        ", orderId=" + orderId +
+        ", status=" + status +
+        '}';
+  }
 }
