@@ -22,16 +22,6 @@ public class KafkaOrderConfig {
     KafkaOrderCommonConfig commonConfig;
 
     @Bean
-    public ProducerFactory<String, OrderRequestDto> producerFactoryForOrderRequestDto() {
-        return new DefaultKafkaProducerFactory<>(commonConfig.producerConfigs());
-    }
-
-    @Bean
-    public KafkaTemplate<String, OrderRequestDto> kafkaTemplateForOrderRequestDto() {
-        return new KafkaTemplate<String, OrderRequestDto>(producerFactoryForOrderRequestDto());
-    }
-
-    @Bean
     public ProducerFactory<String, OrderReplyDto> producerFactoryForOrderReplyDto() {
         return new DefaultKafkaProducerFactory<>(commonConfig.producerConfigs());
     }
