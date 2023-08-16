@@ -7,35 +7,32 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
+import static com.stickyio.util.CustomerConstants.*;
+
 @Configuration
-public class KafkaOrderTopicConfig {
-    @Bean
-    public NewTopic CreateOrderReplyTopic(){
-        return TopicBuilder.name("create-order-reply")
-                .build();
-    }
+public class KafkaTopicConfig {
 
     @Bean
     public NewTopic TrackOrderExternalRequestTopic(){
-        return TopicBuilder.name("track-order-ext-request")
+        return TopicBuilder.name(TRACK_EXTERNAL_ORDER_REQUEST_TOPIC)
                 .build();
     }
 
     @Bean
     public NewTopic TrackOrderExternalReplyTopic(){
-        return TopicBuilder.name("track-order-ext-reply")
+        return TopicBuilder.name(TRACK_EXTERNAL_ORDER_RESPONSE_TOPIC)
                 .build();
     }
 
     @Bean
     public NewTopic TrackOrderRequestTopic(){
-        return TopicBuilder.name("track-order-request")
+        return TopicBuilder.name(TRACK_ORDER_REQUEST_TOPIC)
                 .build();
     }
 
     @Bean
     public NewTopic TrackOrderReplyTopic(){
-        return TopicBuilder.name("track-order-reply")
+        return TopicBuilder.name(TRACK_ORDER_REPLY_TOPIC)
                 .build();
     }
 }

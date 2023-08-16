@@ -21,4 +21,13 @@ public class OrderReplyDto {
         this.orderId = orderId;
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return "OrderReplyDto{" +
+                "customerId=" + customerId +
+                ", orderId=" + orderId +
+                ", status=" + status +
+                '}';
+    }
 }

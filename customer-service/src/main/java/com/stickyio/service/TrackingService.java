@@ -8,45 +8,50 @@ import com.stickyio.dto.TrackingResponseDto;
 import com.stickyio.repository.CustomerOrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.time.Duration;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import static com.stickyio.util.CustomerConstants.TRACK_ORDER_REPLY_TOPIC;
+import static com.stickyio.util.CustomerConstants.TRACK_ORDER_REQUEST_TOPIC;
 
 @Service
 @Slf4j
 public class TrackingService {
-    private KafkaTemplate<String, TrackingRequestDto> kafkaTemplate;
-
     @Autowired
     CustomerOrderRepository customerOrderRepository;
-
-    public TrackingService(KafkaTemplate<String, TrackingRequestDto> kafkaTemplate) {
-
-        this.kafkaTemplate = kafkaTemplate;
-    }
-
-    public CustomerOrderMapping createTrackingRequest(Long orderId) {
-        log.info(String.format("Tracking for: %s",orderId));
-        Message<TrackingRequestDto> message = MessageBuilder
-                .withPayload(new TrackingRequestDto(orderId))
-                .setHeader(KafkaHeaders.TOPIC,"track-order-request")
-                .build();
-        kafkaTemplate.send(message);
-        return customerOrderRepository.findFirstByOrderId(orderId);
-    }
+    @Autowired
+    ReplyingKafkaTemplate<String, TrackingRequestDto, TrackingResponseDto> kafkaTemplateForTracking;
 
     @Transactional
-    @KafkaListener(topics = "track-order-reply", groupId = "shoppingGroup")
-    public void receiveTrackingReply(TrackingResponseDto trackingResponse) {
-        log.info(String.format("Received Tracking Response: %s", trackingResponse.toString()));
+    public CustomerOrderMapping createTrackingRequest(Long orderId) throws InterruptedException, ExecutionException, TimeoutException {
+        log.info(String.format("Tracking for: %s", orderId));
+        if (!kafkaTemplateForTracking.waitForAssignment(Duration.ofSeconds(10))) {
+            throw new IllegalStateException("Reply container did not initialize");
+        }
+        ProducerRecord<String, TrackingRequestDto> record = new ProducerRecord<>(
+                TRACK_ORDER_REQUEST_TOPIC, new TrackingRequestDto(orderId));
+        record.headers().add(new RecordHeader(
+                KafkaHeaders.REPLY_TOPIC, TRACK_ORDER_REPLY_TOPIC.getBytes()));
+        RequestReplyFuture<String, TrackingRequestDto, TrackingResponseDto> sendAndReceive =
+                kafkaTemplateForTracking.sendAndReceive(record, Duration.ofSeconds(10));
+        SendResult<String, TrackingRequestDto> sendResult = sendAndReceive.getSendFuture().get();
+        ConsumerRecord<String, TrackingResponseDto> consumerRecord = sendAndReceive.get();
+        log.info(String.format("Received Tracking Response: %s", consumerRecord.value().toString()));
         customerOrderRepository.updateCourierStatusByOrderId(
-                trackingResponse.getOrderId(),
-                trackingResponse.getCurrentStatus());
+                consumerRecord.value().getOrderId(),
+                consumerRecord.value().getCurrentStatus()
+        );
+        return customerOrderRepository.findFirstByOrderId(orderId);
     }
 }

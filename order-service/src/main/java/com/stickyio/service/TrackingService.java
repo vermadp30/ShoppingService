@@ -12,10 +12,15 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import static com.stickyio.util.CustomerConstants.TRACK_ORDER_REQUEST_TOPIC;
 
 @Service
 @Slf4j
@@ -24,37 +29,21 @@ public class TrackingService {
     CourierRepository courierRepository;
     @Autowired
     ExternalTrackingService externalTrackingService;
-    private KafkaTemplate<String, TrackingRequestDto> kafkaTrackingServiceTemplate;
 
-    public TrackingService(KafkaTemplate<String, TrackingRequestDto> kafkaTemplate) {
-
-        this.kafkaTrackingServiceTemplate = kafkaTemplate;
-    }
-
-    @KafkaListener(topics = "track-order-request", groupId = "shoppingGroup")
-    public void receiveTrackingRequest(TrackingRequestDto trackingRequest)
-    {
+    @KafkaListener(topics = TRACK_ORDER_REQUEST_TOPIC, groupId = "shoppingGroup")
+    @SendTo
+    public TrackingResponseDto receiveTrackingRequest(TrackingRequestDto trackingRequest)
+            throws ExecutionException, InterruptedException, TimeoutException {
         log.info(String.format("Track Order Request Received: %s",trackingRequest.toString()));
-        externalTrackingService.createExternalTrackingRequest(trackingRequest.getOrderId());
-        sendTrackingReply(trackingRequest.getOrderId());
-    }
-
-    public void sendTrackingReply(Long orderId) {
-        log.info(String.format("Responding for tracking request for order: %s",orderId));
-        courierRepository.findCourierByOrderId(orderId)
+        TrackingResponseDto trackingResponse=externalTrackingService.
+                createExternalTrackingRequest(trackingRequest.getOrderId());
+        courierRepository.findCourierByOrderId(trackingRequest.getOrderId())
                 .ifPresent(
                         courier -> {
-                            kafkaTrackingServiceTemplate.send(
-                                    MessageBuilder
-                                            .withPayload(new TrackingResponseDto(
-                                                    orderId,
-                                                    courier.getCurrentStatus(),
-                                                    courier.getIsDelivered()
-                                            ))
-                                            .setHeader(KafkaHeaders.TOPIC,"track-order-reply")
-                                            .build()
-                            );
+                            trackingResponse.setCurrentStatus(courier.getCurrentStatus());
+                            trackingResponse.setIsDelivered(courier.getIsDelivered());
                         }
                 );
+        return trackingResponse;
     }
 }
