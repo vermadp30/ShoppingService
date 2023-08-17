@@ -2,6 +2,8 @@
 
 package com.stickyio.service;
 
+import static com.stickyio.util.CustomerConstants.CREATE_ORDER_TOPIC;
+
 import com.stickyio.dao.Courier;
 import com.stickyio.dao.Order;
 import com.stickyio.dao.OrderStatus;
@@ -15,39 +17,37 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
 
-import static com.stickyio.util.CustomerConstants.CREATE_ORDER_TOPIC;
-
 @Service
 @Slf4j
 public class OrderService {
-    @Autowired
-    OrderRepository orderRepository;
 
-    @Autowired
-    CourierRepository courierRepository;
+  @Autowired
+  OrderRepository orderRepository;
 
-    @KafkaListener(topics = CREATE_ORDER_TOPIC, groupId = "shoppingGroup")
-    @SendTo
-    OrderReplyDto createOrder(OrderRequestDto orderRequest) throws InterruptedException {
-        log.info(String.format("Create Order Request Received: %s", orderRequest.toString()));
-        Order order = new Order();
-        order.setCustomerId(orderRequest.getCustomerId());
-        order.setItem(orderRequest.getItem());
-        order.setStatus(OrderStatus.ORDER_PLACED);
-        order = orderRepository.save(order);
-        addCourierDetails(order);
-        OrderReplyDto orderReply = new OrderReplyDto(
-                order.getCustomerId(),
-                order.getId(),
-                order.getStatus());
-        return orderReply;
-    }
+  @Autowired
+  CourierRepository courierRepository;
 
-    public void addCourierDetails(Order order) {
-        courierRepository.save(new Courier(
-                order.getId(),
-                "Order Received",
-                false
-        ));
-    }
+  @KafkaListener(topics = CREATE_ORDER_TOPIC, groupId = "shoppingGroup")
+  @SendTo
+  OrderReplyDto createOrder(OrderRequestDto orderRequest) throws InterruptedException {
+    log.info(String.format("Create Order Request Received: %s", orderRequest.toString()));
+    Order order = new Order();
+    order.setCustomerId(orderRequest.getCustomerId());
+    order.setItem(orderRequest.getItem());
+    order.setStatus(OrderStatus.ORDER_PLACED);
+    order = orderRepository.save(order);
+    addCourierDetails(order);
+    return new OrderReplyDto(
+        order.getCustomerId(),
+        order.getId(),
+        order.getStatus());
+  }
+
+  public void addCourierDetails(Order order) {
+    courierRepository.save(new Courier(
+        order.getId(),
+        "Order Received",
+        false
+    ));
+  }
 }

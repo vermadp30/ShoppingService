@@ -33,7 +33,6 @@ public class ExternalCourierService {
 
   private String generateRandomStatus(Long orderNumber) {
     String[] cities = {"Mumbai", "Surat", "Ratlam", "Kota", "Jaipur", "New Delhi"};
-    String randomCity = cities[(int) (Math.random() * cities.length)];
-    return randomCity;
+    return cities[(int) (Math.random() * cities.length)];
   }
 }

@@ -3,8 +3,6 @@
 package com.stickyio.config;
 
 import static com.stickyio.util.CustomerConstants.CREATE_ORDER_TOPIC;
-import static com.stickyio.util.CustomerConstants.SAMPLE_REQUEST_REPLY_TOPIC;
-import static com.stickyio.util.CustomerConstants.SAMPLE_REQUEST_TOPIC;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;
@@ -19,17 +17,4 @@ public class KafkaCustomerTopicConfig {
     return TopicBuilder.name(CREATE_ORDER_TOPIC)
         .build();
   }
-
-  @Bean
-  public NewTopic SampleRequestTopic() {
-    return TopicBuilder.name(SAMPLE_REQUEST_TOPIC)
-        .build();
-  }
-
-  @Bean
-  public NewTopic SampleRequestReplyTopic() {
-    return TopicBuilder.name(SAMPLE_REQUEST_REPLY_TOPIC)
-        .build();
-  }
-
 }
