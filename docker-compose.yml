@@ -1,0 +1,80 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:13-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: shoppingservicedb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:3.8
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    volumes:
+      - "zookeeper_data:/bitnami"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  kafka:
+    image: docker.io/bitnami/kafka:3.2
+    container_name: kafka
+    ports:
+      - 9092:9092
+    volumes:
+      - "kafka_data:/bitnami"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+    depends_on:
+      - zookeeper
+  customer-service-backend:
+    build: ./customer-service
+    container_name: customer-service
+    ports:
+      - "8082:8082"
+    environment:
+      db-url: jdbc:postgresql://postgres:5432/shoppingservicedb
+      db-username: postgres
+      db-password: password
+      kafka-server: kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+  order-service-backend:
+    build: ./order-service
+    container_name: order-service
+    ports:
+      - "8083:8083"
+    environment:
+      db-url: jdbc:postgresql://postgres:5432/shoppingservicedb
+      db-username: postgres
+      db-password: password
+      kafka-server: kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+      - customer-service-backend
+  courier-service-backend:
+    build: ./courier-service
+    container_name: courier-service
+    ports:
+      - "8085:8085"
+    environment:
+      kafka-server: kafka:9092
+    depends_on:
+      - kafka
+      - order-service-backend
+volumes:
+  db:
+    driver: local
+  zookeeper_data:
+    driver: local
+  kafka_data:
+    driver: local
+  postgres-data:
