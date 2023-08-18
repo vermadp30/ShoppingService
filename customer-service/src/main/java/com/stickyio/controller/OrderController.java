@@ -8,6 +8,7 @@ import com.stickyio.repository.CustomerOrderRepository;
 import com.stickyio.service.OrderService;
 import com.stickyio.service.TrackingService;
 import jakarta.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -54,6 +55,6 @@ public class OrderController {
   @PostMapping("/status/{orderId}")
   @Transactional
   int trackOrder(@PathVariable Long orderId, @RequestParam String status) {
-    return customerOrderRepository.updateCourierStatusByOrderId(orderId, status);
+    return customerOrderRepository.updateCourierStatusByOrderIdAndDate(orderId, status, new Date());
   }
 }

@@ -8,6 +8,7 @@ public class CustomerConstants {
   public static final String CREATE_ORDER_REPLY_TOPIC = "create-order-reply";
   public static final String TRACK_ORDER_REQUEST_TOPIC = "track-order-request";
   public static final String TRACK_ORDER_REPLY_TOPIC = "track-order-reply";
-  public static final String SAMPLE_REQUEST_TOPIC = "create-request";
-  public static final String SAMPLE_REQUEST_REPLY_TOPIC = "create-request-reply";
+  public static final String DATE_PATTERN = "dd/MM/yyyy HH:mm:ss zz";
+
+
 }

@@ -10,7 +10,9 @@ import com.stickyio.dto.OrderReplyDto;
 import com.stickyio.dto.OrderRequestDto;
 import com.stickyio.repository.CustomerOrderRepository;
 import com.stickyio.repository.CustomerRepository;
+import com.stickyio.util.Common;
 import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -41,6 +43,7 @@ public class OrderService {
     if (!kafkaTemplateForOrder.waitForAssignment(Duration.ofSeconds(10))) {
       throw new IllegalStateException("Reply container did not initialize");
     }
+    order.setCreatedOn(new Date());
     log.info(String.format("Create Order Request: %s", order.toString()));
     ProducerRecord<String, OrderRequestDto> record = new ProducerRecord<>(
         CREATE_ORDER_TOPIC, order);
@@ -52,10 +55,15 @@ public class OrderService {
     ConsumerRecord<String, OrderReplyDto> consumerRecord = sendAndReceive.get();
     log.info(String.format("Order created : %s", consumerRecord.value().toString()));
     customerOrderRepository.save(new CustomerOrderMapping(
-        consumerRecord.value().getCustomerId(), consumerRecord.value().getOrderId()));
-    return String.format("Order for item '%s' generated with Id '%s' for the customer.",
+        consumerRecord.value().getCustomerId(), consumerRecord.value().getOrderId(),
+        order.getItem(), consumerRecord.value().getStatus().name(),
+        order.getCreatedOn()
+    ));
+    return String.format(
+        "Order Request for item '%s' generated with Id '%s' for the customer on %s.",
         order.getItem(),
-        consumerRecord.value().getOrderId());
+        consumerRecord.value().getOrderId(), Common.getFormattedDate(order.getCreatedOn())
+    );
   }
 
   public List<CustomerOrderMapping> getOrderByEmail(String email) {

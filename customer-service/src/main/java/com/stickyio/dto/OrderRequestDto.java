@@ -2,6 +2,7 @@
 
 package com.stickyio.dto;
 
+import java.util.Date;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,10 +14,12 @@ public class OrderRequestDto {
 
   private Long customerId;
   private String item;
+  private Date createdOn;
 
-  public OrderRequestDto(Long customerId, String item) {
+  public OrderRequestDto(Long customerId, String item, Date date) {
     this.customerId = customerId;
     this.item = item;
+    this.createdOn = date;
   }
 
   @Override
@@ -24,6 +27,7 @@ public class OrderRequestDto {
     return "OrderRequestDto{" +
         "customerId=" + customerId +
         ", item='" + item + '\'' +
+        ", createdOn=" + createdOn +
         '}';
   }
 }

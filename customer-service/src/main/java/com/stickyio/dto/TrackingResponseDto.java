@@ -2,6 +2,7 @@
 
 package com.stickyio.dto;
 
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ public class TrackingResponseDto {
   private Long orderId;
   private String currentStatus;
   private Boolean isDelivered;
+  private Date responseTimestamp;
 
   @Override
   public String toString() {
@@ -23,6 +25,7 @@ public class TrackingResponseDto {
         "orderId=" + orderId +
         ", currentStatus='" + currentStatus + '\'' +
         ", isDelivered=" + isDelivered +
+        ", responseTimestamp=" + responseTimestamp +
         '}';
   }
 }

@@ -5,10 +5,10 @@ package com.stickyio.service;
 import static com.stickyio.util.CustomerConstants.TRACK_EXTERNAL_ORDER_REQUEST_TOPIC;
 import static com.stickyio.util.CustomerConstants.TRACK_EXTERNAL_ORDER_RESPONSE_TOPIC;
 
+import com.stickyio.dao.OrderTrackingData;
 import com.stickyio.dto.TrackingRequestDto;
 import com.stickyio.dto.TrackingResponseDto;
-import com.stickyio.repository.CourierRepository;
-import jakarta.transaction.Transactional;
+import com.stickyio.repository.OrderTrackingDataRepository;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -28,11 +28,10 @@ import org.springframework.stereotype.Service;
 public class ExternalTrackingService {
 
   @Autowired
-  CourierRepository courierRepository;
+  OrderTrackingDataRepository orderTrackingDataRepository;
   @Autowired
   ReplyingKafkaTemplate<String, TrackingRequestDto, TrackingResponseDto> kafkaTemplateForExternalTracking;
 
-  @Transactional
   public TrackingResponseDto createExternalTrackingRequest(Long orderId)
       throws InterruptedException, ExecutionException, TimeoutException {
     log.info(String.format("Tracking for: %s", orderId));
@@ -48,10 +47,12 @@ public class ExternalTrackingService {
     SendResult<String, TrackingRequestDto> sendResult = sendAndReceive.getSendFuture().get();
     ConsumerRecord<String, TrackingResponseDto> consumerRecord = sendAndReceive.get();
     log.info(String.format("Received Tracking Response: %s", consumerRecord.value().toString()));
-    courierRepository.updateCourierStatusAndIsDeliveredByOrderId(
+    orderTrackingDataRepository.save(new OrderTrackingData(
         consumerRecord.value().getOrderId(),
         consumerRecord.value().getCurrentStatus(),
-        consumerRecord.value().getIsDelivered());
+        consumerRecord.value().getIsDelivered(),
+        consumerRecord.value().getResponseTimestamp()
+    ));
     return consumerRecord.value();
   }
 }

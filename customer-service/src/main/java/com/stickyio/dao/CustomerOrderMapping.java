@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Date;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,10 +30,19 @@ public class CustomerOrderMapping {
   @Column(name = "order-id", nullable = false, unique = true)
   private Long orderId;
 
+  private String itemName;
+
   private String currentStatus;
 
-  public CustomerOrderMapping(Long customerId, Long orderId) {
+  @Getter
+  private Date updatedOn;
+
+  public CustomerOrderMapping(Long customerId, Long orderId, String itemName, String currentStatus,
+      Date updatedOn) {
     this.customerId = customerId;
     this.orderId = orderId;
+    this.itemName = itemName;
+    this.currentStatus = currentStatus;
+    this.updatedOn = updatedOn;
   }
 }

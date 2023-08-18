@@ -4,6 +4,7 @@ package com.stickyio.service;
 
 import com.stickyio.dto.TrackingRequestDto;
 import com.stickyio.dto.TrackingResponseDto;
+import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -19,11 +20,12 @@ public class ExternalCourierService {
     log.info(
         String.format("Received Tracking Request for order: %s", trackingRequest.getOrderId()));
     String location = generateRandomStatus(trackingRequest.getOrderId());
-    String status = "Packet arrived at " + location + " hub";
+    String status = "Package arrived at " + location + " hub";
     TrackingResponseDto trackingResponse = new TrackingResponseDto(
         trackingRequest.getOrderId(),
         status,
-        false
+        false,
+        new Date()
     );
     log.info(String.format("Sending Status as %s for Order Id: %s",
         trackingResponse.getCurrentStatus(),

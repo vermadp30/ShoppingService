@@ -11,6 +11,7 @@ import com.stickyio.dto.TrackingResponseDto;
 import com.stickyio.repository.CustomerOrderRepository;
 import jakarta.transaction.Transactional;
 import java.time.Duration;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,9 @@ public class TrackingService {
   public CustomerOrderMapping createTrackingRequest(Long orderId)
       throws InterruptedException, ExecutionException, TimeoutException {
     log.info(String.format("Tracking for: %s", orderId));
+    if (customerOrderRepository.findFirstByOrderId(orderId).isEmpty()) {
+      return new CustomerOrderMapping(null, orderId, null, "Order Not Found", new Date());
+    }
     if (!kafkaTemplateForTracking.waitForAssignment(Duration.ofSeconds(10))) {
       throw new IllegalStateException("Reply container did not initialize");
     }
@@ -49,10 +53,11 @@ public class TrackingService {
     SendResult<String, TrackingRequestDto> sendResult = sendAndReceive.getSendFuture().get();
     ConsumerRecord<String, TrackingResponseDto> consumerRecord = sendAndReceive.get();
     log.info(String.format("Received Tracking Response: %s", consumerRecord.value().toString()));
-    customerOrderRepository.updateCourierStatusByOrderId(
+    customerOrderRepository.updateCourierStatusByOrderIdAndDate(
         consumerRecord.value().getOrderId(),
-        consumerRecord.value().getCurrentStatus()
+        consumerRecord.value().getCurrentStatus(),
+        consumerRecord.value().getResponseTimestamp()
     );
-    return customerOrderRepository.findFirstByOrderId(orderId);
+    return customerOrderRepository.findFirstByOrderId(orderId).get();
   }
 }

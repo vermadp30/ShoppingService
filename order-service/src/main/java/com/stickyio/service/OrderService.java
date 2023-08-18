@@ -4,13 +4,14 @@ package com.stickyio.service;
 
 import static com.stickyio.util.CustomerConstants.CREATE_ORDER_TOPIC;
 
-import com.stickyio.dao.Courier;
 import com.stickyio.dao.Order;
 import com.stickyio.dao.OrderStatus;
+import com.stickyio.dao.OrderTrackingData;
 import com.stickyio.dto.OrderReplyDto;
 import com.stickyio.dto.OrderRequestDto;
-import com.stickyio.repository.CourierRepository;
 import com.stickyio.repository.OrderRepository;
+import com.stickyio.repository.OrderTrackingDataRepository;
+import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -25,7 +26,7 @@ public class OrderService {
   OrderRepository orderRepository;
 
   @Autowired
-  CourierRepository courierRepository;
+  OrderTrackingDataRepository orderTrackingDataRepository;
 
   @KafkaListener(topics = CREATE_ORDER_TOPIC, groupId = "shoppingGroup")
   @SendTo
@@ -35,6 +36,7 @@ public class OrderService {
     order.setCustomerId(orderRequest.getCustomerId());
     order.setItem(orderRequest.getItem());
     order.setStatus(OrderStatus.ORDER_PLACED);
+    order.setUpdatedOn(orderRequest.getCreatedOn());
     order = orderRepository.save(order);
     addCourierDetails(order);
     return new OrderReplyDto(
@@ -44,10 +46,11 @@ public class OrderService {
   }
 
   public void addCourierDetails(Order order) {
-    courierRepository.save(new Courier(
+    orderTrackingDataRepository.save(new OrderTrackingData(
         order.getId(),
         "Order Received",
-        false
+        false,
+        new Date()
     ));
   }
 }

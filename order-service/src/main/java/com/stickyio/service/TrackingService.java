@@ -4,9 +4,12 @@ package com.stickyio.service;
 
 import static com.stickyio.util.CustomerConstants.TRACK_ORDER_REQUEST_TOPIC;
 
+import com.stickyio.dao.OrderStatus;
 import com.stickyio.dto.TrackingRequestDto;
 import com.stickyio.dto.TrackingResponseDto;
-import com.stickyio.repository.CourierRepository;
+import com.stickyio.repository.OrderRepository;
+import com.stickyio.repository.OrderTrackingDataRepository;
+import jakarta.transaction.Transactional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +23,13 @@ import org.springframework.stereotype.Service;
 public class TrackingService {
 
   @Autowired
-  CourierRepository courierRepository;
+  OrderTrackingDataRepository orderTrackingDataRepository;
+  @Autowired
+  OrderRepository orderRepository;
   @Autowired
   ExternalTrackingService externalTrackingService;
 
+  @Transactional
   @KafkaListener(topics = TRACK_ORDER_REQUEST_TOPIC, groupId = "shoppingGroup")
   @SendTo
   public TrackingResponseDto receiveTrackingRequest(TrackingRequestDto trackingRequest)
@@ -31,13 +37,19 @@ public class TrackingService {
     log.info(String.format("Track Order Request Received: %s", trackingRequest.toString()));
     TrackingResponseDto trackingResponse = externalTrackingService.
         createExternalTrackingRequest(trackingRequest.getOrderId());
-    courierRepository.findCourierByOrderId(trackingRequest.getOrderId())
-        .ifPresent(
-            courier -> {
-              trackingResponse.setCurrentStatus(courier.getCurrentStatus());
-              trackingResponse.setIsDelivered(courier.getIsDelivered());
-            }
-        );
+    updateOrder(trackingResponse);
     return trackingResponse;
+  }
+
+  @Transactional
+  private void updateOrder(TrackingResponseDto trackingResponse) {
+    orderRepository.updateOrderStatusAndStatusDetailByOrderId(
+        trackingResponse.getOrderId(),
+        (trackingResponse.getIsDelivered() ? OrderStatus.ORDER_DELIVERED
+            : OrderStatus.ORDER_ON_THE_WAY),
+        trackingResponse.getCurrentStatus(),
+        trackingResponse.getResponseTimestamp()
+    );
+
   }
 }

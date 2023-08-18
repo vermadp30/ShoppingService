@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Date;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,4 +33,15 @@ public class Order {
 
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
+
+  private String statusDetail;
+
+  private Date updatedOn;
+
+  public Order(Long customerId, OrderStatus status, String statusDetail, Date updatedOn) {
+    this.customerId = customerId;
+    this.status = status;
+    this.statusDetail = statusDetail;
+    this.updatedOn = updatedOn;
+  }
 }
